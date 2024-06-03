@@ -2,13 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Avatar, Button, Dropdown, Navbar, TextInput } from "flowbite-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CiShoppingCart} from "react-icons/ci";
+import { useDispatch, useSelector } from "react-redux";
 
 
 const Header = () => {
   const path = useLocation().pathname;
   const location = useLocation();
   const Navigate = useNavigate();
- 
+  
+  const {currentUser: user} = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {}
 
   return (
     <Navbar className="border-b-2">
@@ -24,7 +29,7 @@ const Header = () => {
       
       <div className="flex gap-2 md:order-2">
         
-        {/* {user ? (
+        {user ? (
           <Dropdown arrowIcon={false} inline label={
             <Avatar alt="user" img={user.profilePic} rounded />
           } >
@@ -38,13 +43,13 @@ const Header = () => {
             <Dropdown.Divider/>
             <Dropdown.Item onClick={handleLogout}>Log out</Dropdown.Item>
           </Dropdown>
-        ) : ( */}
+        ) : (
           <Link to={"/signin"}>
             <Button className="w-12 h-10" color="gray" pill>
               Login
             </Button>
           </Link>
-       
+        )}
         <Navbar.Toggle />
       </div>
       <Navbar.Collapse>
