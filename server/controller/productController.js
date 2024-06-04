@@ -1,4 +1,4 @@
-import Product from "./../models/Products";
+import Product from "./../models/Products.js";
 
 import { errorHandler } from "../utils/err.js";
 
@@ -53,7 +53,7 @@ export const getProduct = async (req, res, next) => {
     }
 }
 
-export const getAllProducts = async (req, res, next) => {
+export const getAllProduct = async (req, res, next) => {
     try {
         const products = await Product.find();
         res.status(200).json(products);
@@ -61,3 +61,4 @@ export const getAllProducts = async (req, res, next) => {
         next(error);
     }
 }
+

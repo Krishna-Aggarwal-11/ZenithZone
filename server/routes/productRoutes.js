@@ -10,3 +10,6 @@ router.post("/update/:id" ,verifyUser, updateProduct)
 router.get("/get/:id" , getProduct)
 router.get("/get" , getAllProduct)
 
+
+export default router;
+
