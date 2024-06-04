@@ -3,14 +3,15 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Alert, Button, TextInput, Modal, Label } from "flowbite-react";
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
+import { logout , deleteStart, deleteSuccess, deleteFailure, updateStart, updateFailure, updateSuccess  } from "../redux/user/userSlice.js";
 
 const DashProfile = () => {
-
-  const currentUser = useSelector((state) => state.user.currentUser);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const {currentUser, loading, error} = useSelector((state) => state.user);
   const [formData, setFormData] = useState({});
-
-  const {showModal , setShowModal} = useState(false);
+  const [updateErrorMessage, setUpdateErrorMessage] = useState('');
+  const [updateSuccessMessage, setUpdateSUccessMessage] = useState('');
+  const [showModal , setShowModal] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -20,19 +21,72 @@ const DashProfile = () => {
   }
 
   const handleSubmit = async (e) => {
-    
+    e.preventDefault();
+    setUpdateErrorMessage('');
+    setUpdateSUccessMessage('');
+    if (Object.keys(formData).length === 0) {
+      setUpdateErrorMessage('Please add all fields');
+    }
+    try {
+      dispatch(updateStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        dispatch(updateFailure(data.errorMessage));
+      } else {
+        dispatch(updateSuccess(data));
+        setUpdateSUccessMessage("Profile updated successfully");
+      }
+    } catch (error) {
+      dispatch(updateFailure(error.message));
+      setUpdateErrorMessage(error.message);
+    }
   }
 
-  const handleLogout = async () => {}
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/user/logout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.errorMessage);
+      } else {
+        dispatch(logout(data));
+      }
+    } catch (error) {}
+  }
 
-  const handleDeleteUser = async () => {}
+  const handleDeleteUser = async () => {
+    setShowModal(false);
+    try {
+      dispatch(deleteStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        dispatch(deleteFailure(data.errorMessage));
+      } else {
+        dispatch(deleteSuccess(data));
+      }
+    } catch (error) {
+      dispatch(deleteFailure(error.message));
+    }
+  };
 
 
 
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
       <h1 className="my-7 text-center font-semibold text-3xl">Profile</h1>
-      <form action=""  className="flex flex-col gap-4">
+      <form action=""  className="flex flex-col gap-4"  onSubmit={handleSubmit}>
         
         <div
           className="relative w-32 h-32 self-center cursor-pointer shadow-md overflow-hidden rounded-full " >
@@ -45,7 +99,7 @@ const DashProfile = () => {
             }`}
           />
         </div>
-        
+        <Label>Username : </Label>
         <TextInput
           type="text"
           placeholder="username"
@@ -53,6 +107,7 @@ const DashProfile = () => {
           defaultValue={currentUser?.username}
           onChange={handleChange}
         />
+        <Label> Email : </Label>
         <TextInput
           type="email"
           placeholder="email"
@@ -60,37 +115,29 @@ const DashProfile = () => {
           defaultValue={currentUser?.email}
           onChange={handleChange}
         />
+        <Label> Phone : </Label>
         <TextInput
           type="text"
           placeholder="phone"
           id="phone"
+          defaultValue={currentUser?.phone}
           onChange={handleChange}
         />
         <Label> Address : </Label>
         <TextInput
           type="text"
-          placeholder="street"
-          id="street"
+          placeholder="address"
+          id="address"
+          defaultValue={currentUser?.address }
           onChange={handleChange}
         />
+        <Label>Password : </Label>
         <TextInput
-          type="text"
-          placeholder="city"
-          id="city"
+          type="password"
+          placeholder="password"
+          id="password"
           onChange={handleChange}
-        />
-        <TextInput
-          type="text"
-          placeholder="state"
-          id="state"
-          onChange={handleChange}
-        />
-        <TextInput
-          type="text"
-          placeholder="zip"
-          id="zip"
-          onChange={handleChange}
-        />
+        />        
         <Button
           type="submit"
           gradientDuoTone={"purpleToBlue"}
@@ -110,6 +157,23 @@ const DashProfile = () => {
           Logout
         </span>
       </div>
+
+      {updateSuccessMessage && (
+        <Alert color="success" className='mt-5'>
+          {updateSuccessMessage}
+        </Alert>
+      )}
+      {updateErrorMessage && (
+        <Alert color="fallure" className='mt-5'>
+          {updateErrorMessage}
+        </Alert>
+      )}
+      {error && (
+        <Alert color="fallure" className='mt-5'>
+          {error}
+        </Alert>
+      )}
+
       
       <Modal
         show={showModal}

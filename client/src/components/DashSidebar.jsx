@@ -3,6 +3,7 @@ import {  HiArrowSmRight, HiChartPie, HiUser } from "react-icons/hi";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/user/userSlice.js";
 
 const DashSidebar = () => {
   const location = useLocation();
@@ -18,7 +19,17 @@ const DashSidebar = () => {
   }, [location.search]);
 
   const handleLogout = async () => {
-    
+    try {
+      const res = await fetch("/api/user/logout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.errorMessage);
+      } else {
+        dispatch(logout(data));
+      }
+    } catch (error) {}
   };
   return (
     <Sidebar className="w-full md:w-56">

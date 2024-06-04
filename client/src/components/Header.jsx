@@ -1,19 +1,33 @@
-import React, { useEffect, useState } from "react";
-import { Avatar, Button, Dropdown, Navbar, TextInput } from "flowbite-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React from "react";
+import { Avatar, Button, Dropdown, Navbar } from "flowbite-react";
+import { Link, useLocation } from "react-router-dom";
 import { CiShoppingCart} from "react-icons/ci";
 import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/user/userSlice.js";
 
 
 const Header = () => {
   const path = useLocation().pathname;
-  const location = useLocation();
-  const Navigate = useNavigate();
   
   const {currentUser: user} = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
-  const handleLogout = () => {}
+  const handleLogout = async() => {
+    
+    try {
+      const res = await fetch('/api/user/logout',{
+        method:'POST',
+      });
+      const data = await res.json();;
+      if (!res.ok) {
+        console.log(data.errorMessage)
+      }else{
+        dispatch(logout(data));
+      }
+    } catch (error) {
+      
+    }
+  }
 
   return (
     <Navbar className="border-b-2">
